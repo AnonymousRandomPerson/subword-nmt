@@ -74,8 +74,12 @@ if __name__ == '__main__':
         sys.stdout = codecs.getwriter('UTF-8')(sys.stdout.buffer)
         sys.stdin = codecs.getreader('UTF-8')(sys.stdin.buffer)
 
+    main()
+
+
+def main(args_list: list = None):
     parser = create_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args_list)
 
     if args.vocab and len(args.input) != len(args.vocab):
         sys.stderr.write('Error: number of input files and vocabulary files must match\n')
