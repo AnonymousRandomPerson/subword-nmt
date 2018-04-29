@@ -37,7 +37,13 @@ class BPE(object):
             self.version = (0, 1)
             codes.seek(0)
 
-        self.bpe_codes = [tuple(item.split()) for (n, item) in enumerate(codes) if (n < merges or merges == -1)]
+        self.bpe_codes = [tuple(item.strip().split(' ')) for (n, item) in enumerate(codes) if (n < merges or merges == -1)]
+
+        for item in self.bpe_codes:
+            if len(item) != 2:
+                sys.stderr.write('Error: invalid line in BPE codes file: {0}\n'.format(' '.join(item)))
+                sys.stderr.write('The line should exist of exactly two subword units, separated by whitespace\n'.format(' '.join(item)))
+                sys.exit(1)
 
         # some hacking to deal with duplicates (only consider first instance)
         self.bpe_codes = dict([(code,i) for (i,code) in reversed(list(enumerate(self.bpe_codes)))])
@@ -52,10 +58,27 @@ class BPE(object):
 
         self.cache = {}
 
+    def process_line(self, line):
+        """segment line, dealing with leading and trailing whitespace"""
+
+        out = ""
+
+        leading_whitespace = len(line)-len(line.lstrip())
+        if leading_whitespace:
+            out += line[:leading_whitespace]
+
+        out += self.segment(line)
+
+        trailing_whitespace = len(line)-len(line.rstrip())
+        if trailing_whitespace:
+            out += line[-trailing_whitespace:]
+
+        return out
+
     def segment(self, sentence):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
         output = []
-        for word in sentence.split(' '):
+        for word in sentence.strip().split(' '):
             # eliminate double spaces
             if not word:
                 continue
@@ -258,7 +281,7 @@ def read_vocabulary(vocab_file, threshold):
     vocabulary = set()
 
     for line in vocab_file:
-        word, freq = line.split()
+        word, freq = line.strip().split(' ')
         freq = int(freq)
         if threshold == None or freq >= threshold:
             vocabulary.add(word)
@@ -313,12 +336,4 @@ if __name__ == '__main__':
     bpe = BPE(args.codes, args.merges, args.separator, vocabulary, args.glossaries)
 
     for line in args.input:
-        leading_whitespace = len(line)-len(line.lstrip())
-        if leading_whitespace:
-            args.output.write(line[:leading_whitespace])
-
-        args.output.write(bpe.segment(line.strip()))
-
-        trailing_whitespace = len(line)-len(line.rstrip())
-        if trailing_whitespace:
-            args.output.write(line[-trailing_whitespace:])
+        args.output.write(bpe.process_line(line))
