@@ -125,5 +125,5 @@ def main(args_list: list = None):
         os.remove(tmp.name)
 
         for key, freq in sorted(vocab.items(), key=lambda x: x[1], reverse=True):
-            vocab_file.write("{0} {1}\n".format(key, freq))
+            vocab_file.write("{0}\t{1}\n".format(key, freq))
         vocab_file.close()
