@@ -292,7 +292,7 @@ def isolate_glossary(word, glossary):
     """
     Isolate a glossary present inside a word.
 
-    Returns a list of subwords. In which all 'glossary' glossaries are isolated 
+    Returns a list of subwords. In which all 'glossary' glossaries are isolated
 
     For example, if 'USA' is the glossary and '1934USABUSA' the word, the return value is:
         ['1934', 'USA', 'B', 'USA']
@@ -304,8 +304,7 @@ def isolate_glossary(word, glossary):
         segments = [segment.strip() for split in splits[:-1] for segment in [split, glossary] if segment != '']
         return segments + [splits[-1].strip()] if splits[-1] != '' else segments
 
-if __name__ == '__main__':
-
+def main(args_list: list = None):
     # python 2/3 compatibility
     if sys.version_info < (3, 0):
         sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
@@ -317,7 +316,7 @@ if __name__ == '__main__':
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', write_through=True, line_buffering=True)
 
     parser = create_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args_list)
 
     # read/write files as UTF-8
     args.codes = codecs.open(args.codes.name, encoding='utf-8')
@@ -337,3 +336,6 @@ if __name__ == '__main__':
 
     for line in args.input:
         args.output.write(bpe.process_line(line))
+
+if __name__ == '__main__':
+    main(sys.argv)
