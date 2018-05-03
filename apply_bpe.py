@@ -281,7 +281,7 @@ def read_vocabulary(vocab_file, threshold):
     vocabulary = set()
 
     for line in vocab_file:
-        word, freq = line.strip().split(' ')
+        word, freq = line.strip().split('\t')
         freq = int(freq)
         if threshold == None or freq >= threshold:
             vocabulary.add(word)
